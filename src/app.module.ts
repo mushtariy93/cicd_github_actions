@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }), AuthModule],
+  imports: [ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true })],
   controllers: [AppController],
   providers: [AppService],
 })
