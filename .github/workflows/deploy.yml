@@ -7,36 +7,36 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Kodni yuklash
+      - name: Upload code
         uses: actions/checkout@v4
 
       - name: SSH kalitni sozlash
-        shell: bash
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+        shell: bash
 
-      - name: Serverga deploy qilish
+      - name: Serverga deploy qilish qismi
         env:
           HOST: ${{ secrets.HOST }}
           USER: ${{ secrets.USERNAME }}
           APP_DIR: /ci_cd
           PORT: ${{ secrets.PORT }}
-        shell: bash
         run: |
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
-          ssh $USER@$HOST 
+          ssh $USER@$HOST "
             if [ ! -d $APP_DIR ]; then
               mkdir -p $APP_DIR
               git clone https://github.com/mushtariy93/cicd_github_actions.git $APP_DIR
-            else
+              cd $APP_DIR 
+              echo 'PORT=${PORT}' > .env
+            else 
               cd $APP_DIR
               git pull origin main
             fi
-            cd $APP_DIR
-            echo "PORT=${PORT}" > .env
             npm install 
             npm run build
             pm2 restart ci_cd_app || pm2 start dist/main.js --name ci_cd_app
-          shell: bash
+          "
+        shell: bash
